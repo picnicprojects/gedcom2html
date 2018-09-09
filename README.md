@@ -1,7 +1,5 @@
-gedcom2html
-
-Gedcom2html is a python script to convert Gedcom files to html files using bootstrap and jquery.
-
+gedcom2html, a python script to convert Gedcom files to html files using bootstrap and jquery.
+============================================
 <h2>Usage</h2>
 ```html
 gedcom2html myfile.ged
