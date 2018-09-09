@@ -22,6 +22,7 @@ gedcom2html uses [gedcom.py](https://github.com/nickreynke/python-gedcom) by Nic
    * -output-dir
    * -language
    * -set_main_person
+- list of people in right column
 - parental tree with collapsable CSS boxes using jquery
 - fan tree
-
+- improve age calculation
