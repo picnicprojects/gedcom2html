@@ -7,13 +7,16 @@ python gedcom2html.py myfile.ged
 * [Dutch Royal Family](https://www.usekees.com/gedcom2.html/koninklijkhuis/)
 * [Britsh Royal Family](http://www.usekees.com/gedcom2.html/royals/)
 ## Special Thanks
-gedcom2html uses [gedcom.py](https://github.com/nickreynke/python-gedcom) by Nick Reynke to parse the gedcom file
+- gedcom2html uses [gedcom.py](https://github.com/nickreynke/python-gedcom) by Nick Reynke to parse the gedcom file
+- [famousfamilytrees](http://famousfamilytrees.blogspot.com/?m=1) for the demo gedcom files
 ## To do
 - copy assets and demos
 - siblings
 - beautify CSS
 - home button
+- box with notes
 - link to index.html with main person
+- small box with gedcom statistics
 - command line options
    * -private
       * none

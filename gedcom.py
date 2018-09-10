@@ -33,6 +33,8 @@ GEDCOM_PROGRAM_DEFINED_TAG_MREL = "_MREL"
 # Relationship to a father.
 GEDCOM_PROGRAM_DEFINED_TAG_FREL = "_FREL"
 
+GEDCOM_TAG_NOTES = "TEXT"
+
 # The event of entering into life.
 GEDCOM_TAG_BIRTH = "BIRT"
 
@@ -221,7 +223,11 @@ class Gedcom:
         line_number = 1
         last_element = self.__root_element
         for line in gedcom_file:
-            last_element = self.__parse_line(line_number, line.decode('utf-8'), last_element)
+            try:
+               last_element = self.__parse_line(line_number, line.decode('utf-8'), last_element)
+            except:
+               print line_number
+               print line
             line_number += 1
 
     @staticmethod
@@ -1087,6 +1093,15 @@ class Element:
             if child.get_tag() == GEDCOM_TAG_DEATH:
                 return True
         return False
+        
+    def get_notes(self):
+        s = '' 
+        if not self.is_individual():
+            return s
+        for child in self.get_child_elements():
+            if child.get_tag() == GEDCOM_TAG_NOTES:
+               s = child.get_value()
+        return s
 
     def get_individual(self):
         """Return this element and all of its sub-elements
