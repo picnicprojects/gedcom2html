@@ -157,7 +157,11 @@ class Html:
             s = s + "(%s years) " % age
       return(s)
    def __create_person_single_line_long(self, p):
-      s = self.__create_person_single_line_short(p) + self.__create_person_single_line_dates(p)
+      s = self.__create_person_single_line_dates(p)
+      if len(s) > 0:
+         s = ("%s <span class='dates'>%s</span>" % (self.__create_person_single_line_short(p), s))
+      else:
+         s = self.__create_person_single_line_short(p)
       return(s)
 
       
@@ -214,7 +218,7 @@ class Html:
             if index == 0:
                fid.write("<ul class='tree'>\n")
             if len(family.spouse.surname) > 0:
-               fid.write("<li><a href='%s'><i class='fa fa-heart'></i> %s</a>\n" %  (family.spouse.link, self.__create_person_single_line_long(family.spouse)))
+               fid.write("<li><a href='%s'><i class='fa fa-heart' style='color:red'></i> %s</a>\n" %  (family.spouse.link, self.__create_person_single_line_long(family.spouse)))
          # CHILDREN
          if hasattr(family,'children'):
             if level == 1:
@@ -225,7 +229,7 @@ class Html:
                arrow = ""
                if level == 0:
                   if len(p.family) > 0:
-                     arrow = "<i class='fa fa-arrow-circle-right' id='child_%s' onclick='toggle_tree(\"children_%s\")'></i>" % (p.id, p.id)
+                     arrow = "<i class='fa fa-arrow-circle-right' id='children_%s' onclick='toggle_tree(\"children_%s\")'></i>" % (p.id, p.id)
                fid.write("%s   <li>%s" % (s, arrow))
                fid.write(" <a href='%s'>%s</a>\n" % (p.link, self.__create_person_single_line_long(p)))
                if hasattr(p, 'family'):
@@ -254,7 +258,7 @@ class Html:
       if hasattr(self.person, 'parents'):
          fid.write("<h2>Parents</h2>\n")
          self.__write_parents(self.person, fid, 0)
-      fid.write("<h2>Families and Children</h2>\n")
+      fid.write("<h2>Families and children</h2>\n")
       self.__write_family(self.person, fid, 0)
       fid.write("<h2>Siblings</h2>\n")
       self.__write_siblings(self.person, fid)
