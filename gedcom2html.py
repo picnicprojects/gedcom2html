@@ -127,11 +127,14 @@ class Family:
       self.children = []
 
 class Html:
-   def __init__(self, p):
+   def __init__(self, p, file_path):
       self.person = p
+      self.__filepath = file_path
       self.__fname = self.__create_filename()
-      fid = codecs.open(self.__fname, encoding='utf-8',mode='w')
-      fid.close()
+      self.__fid = codecs.open(self.__fname, encoding='utf-8',mode='w')
+
+   def __del__(self):
+      self.__fid.close()
 
    def __create_filename(self):
       str = 'generated/' + self.person.link
@@ -159,53 +162,51 @@ class Html:
    def __create_person_single_line_long(self, p):
       s = self.__create_person_single_line_dates(p)
       if len(s) > 0:
-         s = ("%s <span class='dates'>%s</span>" % (self.__create_person_single_line_short(p), s))
+         s = ("<a href='%s'>%s</a> <span class='dates'>%s</span>" % (p.link, self.__create_person_single_line_short(p), s))
       else:
-         s = self.__create_person_single_line_short(p)
+         s = ("<a href='%s'>%s</a>" % (p.link, self.__create_person_single_line_short(p)))
       return(s)
 
       
    def write_header(self):
-      fid = codecs.open(self.__fname, encoding='utf-8',mode='a')
-      fid.write("<!DOCTYPE html>\n")
-      fid.write("<html lang='en'>\n")
-      fid.write("<head>\n")
-      fid.write("<title>%s</title>\n" % self.person.first_name)
-      fid.write("<meta name=\"description\" content=\"gedcom2html\" /><meta name='viewport' content='width=device-width, initial-scale=1.0'>\n")
-      fid.write("<meta http-equiv='Content-Type' content='text/html;charset=utf-8' />\n")
-      fid.write("<link rel='stylesheet' type='text/css' href='css/gedcom2html.css' media='screen, projection, print' />\n")
-      fid.write("<link rel='stylesheet' type='text/css' href='css/font-awesome.min.css' />\n")
-      fid.write("<link rel='stylesheet' type='text/css' href='css/bootstrap.min.css' />\n")
-      fid.write("<script type='text/javascript' src='js/jquery-3.1.1.min.js'></script>\n")
-      fid.write("<script type='text/javascript' src='js/bootstrap.min.js'></script>\n")
-      fid.write("<script type='text/javascript' src='js/gedcom2html.js'></script>\n")
-      # fid.write("<script type='text/javascript' src='../js/d3.min.js'></script>\n")
-      # fid.write("<script type='text/javascript' src='../js/d3plus.min.js'></script>\n")
-      # fid.write("<script type='text/javascript' src='../js/d3tree.js'></script>\n")
-      fid.write("</head>\n")
-      fid.write("<body>\n")
-      fid.write("<div class='container'>\n")
-      fid.write("<div class='row'>\n")
-      fid.close()
+      self.__fid.write("<!DOCTYPE html>\n")
+      self.__fid.write("<html lang='en'>\n")
+      self.__fid.write("<head>\n")
+      self.__fid.write("<title>%s</title>\n" % self.person.first_name)
+      self.__fid.write("<meta name=\"description\" content=\"gedcom2html\" /><meta name='viewport' content='width=device-width, initial-scale=1.0'>\n")
+      self.__fid.write("<meta http-equiv='Content-Type' content='text/html;charset=utf-8' />\n")
+      self.__fid.write("<link rel='stylesheet' type='text/css' href='css/gedcom2html.css' media='screen, projection, print' />\n")
+      self.__fid.write("<link rel='stylesheet' type='text/css' href='css/font-awesome.min.css' />\n")
+      self.__fid.write("<link rel='stylesheet' type='text/css' href='css/bootstrap.min.css' />\n")
+      self.__fid.write("<script type='text/javascript' src='js/jquery-3.1.1.min.js'></script>\n")
+      self.__fid.write("<script type='text/javascript' src='js/bootstrap.min.js'></script>\n")
+      self.__fid.write("<script type='text/javascript' src='js/gedcom2html.js'></script>\n")
+      # self.__fid.write("<script type='text/javascript' src='../js/d3.min.js'></script>\n")
+      # self.__fid.write("<script type='text/javascript' src='../js/d3plus.min.js'></script>\n")
+      # self.__fid.write("<script type='text/javascript' src='../js/d3tree.js'></script>\n")
+      self.__fid.write("</head>\n")
+      self.__fid.write("<body>\n")
+      self.__fid.write("<div class='container'>\n")
+      self.__fid.write("<div class='row'>\n")
       
-   def __write_parents(self, person, fid, level):
+   def __write_parents(self, person, level):
       s  = '   '*level
       if level == 1:
-         fid.write("%s<ul class='tree' id='ul_parent_%s'>\n" % (s,person.id))
+         self.__fid.write("%s<ul class='tree' id='ul_parent_%s'>\n" % (s,person.id))
       else:
-         fid.write("%s<ul class='tree'>\n" % (s))
+         self.__fid.write("%s<ul class='tree'>\n" % (s))
       for f in person.parents:
          arrow = ""
          if hasattr(f, 'parents'):
             if level == 0:
                arrow = "<i class='fa fa-arrow-circle-right' id='parent_%s' onclick='toggle_tree(\"parent_%s\")'></i>" % (f.id, f.id)
-         fid.write("%s   <li>%s" % (s, arrow))
-         fid.write(" <a href='%s'>%s</a>\n" % (f.link, self.__create_person_single_line_long(f)))
+         self.__fid.write("%s   <li>%s" % (s, arrow))
+         self.__fid.write(" %s\n" % (self.__create_person_single_line_long(f)))
          if hasattr(f, 'parents'):
-            self.__write_parents(f, fid, level + 1)
-      fid.write("%s</ul>\n" % s)
+            self.__write_parents(f, level + 1)
+      self.__fid.write("%s</ul>\n" % s)
       
-   def __write_family(self, current_person, fid, level):
+   def __write_family(self, current_person, level):
       s = '   '*level
       n = len(current_person.family)
       for index, family in enumerate(current_person.family):
@@ -216,76 +217,88 @@ class Html:
                show_spouse = 1
          if show_spouse:
             if index == 0:
-               fid.write("<ul class='tree'>\n")
+               self.__fid.write("<ul class='tree'>\n")
             if len(family.spouse.surname) > 0:
-               fid.write("<li><a href='%s'><i class='fa fa-heart' style='color:red'></i> %s</a>\n" %  (family.spouse.link, self.__create_person_single_line_long(family.spouse)))
+               self.__fid.write("<li><i class='fa fa-heart' style='color:#faa'></i> %s\n" %  (self.__create_person_single_line_long(family.spouse)))
          # CHILDREN
          if hasattr(family,'children'):
             if level == 1:
-               fid.write("%s<ul class='tree' id='ul_children_%s'>\n" % (s, current_person.id))
+               self.__fid.write("%s<ul class='tree' id='ul_children_%s'>\n" % (s, current_person.id))
             else:
-               fid.write("%s<ul class='tree'>\n" % (s))
+               self.__fid.write("%s<ul class='tree'>\n" % (s))
             for p in family.children:
                arrow = ""
                if level == 0:
                   if len(p.family) > 0:
                      arrow = "<i class='fa fa-arrow-circle-right' id='children_%s' onclick='toggle_tree(\"children_%s\")'></i>" % (p.id, p.id)
-               fid.write("%s   <li>%s" % (s, arrow))
-               fid.write(" <a href='%s'>%s</a>\n" % (p.link, self.__create_person_single_line_long(p)))
+               self.__fid.write("%s   <li>%s" % (s, arrow))
+               self.__fid.write(" %s\n" % (self.__create_person_single_line_long(p)))
                if hasattr(p, 'family'):
-                  self.__write_family(p, fid, level + 1)
-            fid.write("%s</ul>\n" % s)
+                  self.__write_family(p, level + 1)
+            self.__fid.write("%s</ul>\n" % s)
          # SPOUSE
          if show_spouse:
             if index == (n-1):
-               fid.write("</ul>\n")
+               self.__fid.write("</ul>\n")
                   
-   def __write_siblings(self, p, fid):
-      fid.write("<ul>\n")
+   def __write_siblings(self, p):
+      self.__fid.write("<ul>\n")
       for s in p.siblings:
-         fid.write("<li><a href='%s'>%s</a>\n" % (s.link, self.__create_person_single_line_long(s)))
-      fid.write("</ul>\n")
+         self.__fid.write("<li>%s\n" % (self.__create_person_single_line_long(s)))
+      self.__fid.write("</ul>\n")
          
       
    def write_section_person(self):
-      fid = codecs.open(self.__fname, encoding='utf-8',mode='a')
-      fid.write("<h1>%s</h1>\n" %  self.__create_person_single_line_short(self.person))
-      fid.write("%s\n" %  self.__create_person_single_line_dates(self.person))
-      fid.write("<div>%s</div>\n" %  self.person.notes)
-      fid.write("</div>\n")
-      fid.write("<div class='row'>\n")
-      # fid.write("<div class='col-sm-12'>\n")
+      self.__fid.write("<div class='well'>\n")
+      self.__fid.write("<h1>%s</h1>\n" %  self.__create_person_single_line_short(self.person))
+      self.__fid.write("<ul>\n")
+      s = self.__create_person_single_line_dates(self.person)
+      if len(s)>0:
+         self.__fid.write("<li>%s\n" %  s)
+      s = self.person.notes
+      if len(s)>0:
+         self.__fid.write("<li>%s\n" %  s)
+      self.__fid.write("<ul>\n")
+      self.__fid.write("</div>\n")
+      self.__fid.write("</div><!-- row -->\n")
+      self.__fid.write("<div class='row'>\n")
+      # self.__fid.write("<div class='col-sm-12'>\n")
       if hasattr(self.person, 'parents'):
-         fid.write("<h2>Parents</h2>\n")
-         self.__write_parents(self.person, fid, 0)
-      fid.write("<h2>Families and children</h2>\n")
-      self.__write_family(self.person, fid, 0)
-      fid.write("<h2>Siblings</h2>\n")
-      self.__write_siblings(self.person, fid)
-      # fid.write("</div><!-- col -->\n")
+         self.__fid.write("<h2>Parents</h2>\n")
+         self.__write_parents(self.person, 0)
+      self.__fid.write("<h2>Families and children</h2>\n")
+      self.__write_family(self.person, 0)
+      self.__fid.write("<h2>Siblings</h2>\n")
+      self.__write_siblings(self.person)
+      # self.__fid.write("</div><!-- col -->\n")
 
+   def write_section_statistics(self, n):
+      self.__fid.write("</div><!-- row -->\n")
+      # self.__fid.write("<div class='col-sm-1'>\n")
+      # self.__fid.write("</div>\n")
+      self.__fid.write("</div>\n")
+      
    def write_hourglass_tree(self, j):
-      fid = codecs.open(self.__fname, encoding='utf-8',mode='a')
-      fid.write("<div class='col-sm-6'>\n")
-      fid.write("<h2>Tree</h2>\n")
-      fid.write("<div class='tree'></div>\n")
-      fid.write("<script>\n")
-      fid.write("var json = " +j)
-      fid.write("drawTree(json);\n")
-      fid.write("</script>\n")
-      fid.write("</div>\n")
+      self.__fid.write("<div class='col-sm-6'>\n")
+      self.__fid.write("<h2>Tree</h2>\n")
+      self.__fid.write("<div class='tree'></div>\n")
+      self.__fid.write("<script>\n")
+      self.__fid.write("var json = " +j)
+      self.__fid.write("drawTree(json);\n")
+      self.__fid.write("</script>\n")
+      self.__fid.write("</div>\n")
       
    
-   def write_footer(self):
-      fid = codecs.open(self.__fname, encoding='utf-8',mode='a')
-      fid.write("</div><!-- row -->\n")
-      fid.write("</div><!-- container -->\n")
-      fid.write("<footer>\n")
-      fid.write("<center>gedcom2html</center>\n")
-      fid.write("</footer>\n")
-      fid.write("</body>\n")
-      fid.write("</html>\n")
-      fid.close()
+   def write_footer(self,n):
+      self.__fid.write("</div><!-- row -->\n")
+      self.__fid.write("</div><!-- container -->\n")
+      self.__fid.write("<footer>\n")
+      self.__fid.write("<a href=''>%s</a> contains %d persons\n" % ( self.__filepath, n))
+      self.__fid.write("<center>gedcom2html</center>\n")
+      self.__fid.write("</footer>\n")
+      self.__fid.write("</body>\n")
+      self.__fid.write("</html>\n")
+      self.__fid.close()
 
 def copy_assets():
    shutil.rmtree('generated')
@@ -306,15 +319,20 @@ file_path = 'demo/dutchroyalfamily.ged'
 # file_path = 'demo/kees.ged' 
 gedcom = Gedcom(file_path)
 copy_assets()
+n = 0
+for e in gedcom.get_element_list():
+   if e.is_individual():
+      n = n + 1
 for e in gedcom.get_element_list():
    if e.is_individual():
       p = Person(e,gedcom)
       p.get_parents()
       p.get_families()
       p.get_siblings()
-      h = Html(p)
+      h = Html(p, file_path)
       h.write_header()
       h.write_section_person()
-      h.write_footer()
+      # h.write_section_statistics(n)
+      h.write_footer(n)
       # stop
       

@@ -33,7 +33,7 @@ GEDCOM_PROGRAM_DEFINED_TAG_MREL = "_MREL"
 # Relationship to a father.
 GEDCOM_PROGRAM_DEFINED_TAG_FREL = "_FREL"
 
-GEDCOM_TAG_NOTES = "TEXT"
+GEDCOM_TAG_NOTES = "NOTE"
 
 # The event of entering into life.
 GEDCOM_TAG_BIRTH = "BIRT"

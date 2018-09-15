@@ -4,14 +4,14 @@
 python gedcom2html.py myfile.ged
 ```
 ## Examples
-* [Dutch Royal Family](https://www.usekees.com/gedcom2.html/koninklijkhuis/)
-* [Britsh Royal Family](http://www.usekees.com/gedcom2.html/royals/)
+* [Dutch Royal Family](//picnicprojects.com/gedcom2html/dutchroyalfamily/)
 ## Special Thanks
 - gedcom2html uses [gedcom.py](https://github.com/nickreynke/python-gedcom) by Nick Reynke to parse the gedcom file
 - [famousfamilytrees](http://famousfamilytrees.blogspot.com/?m=1) for the demo gedcom files
 ## To do
-- copy assets and demos
-- siblings
+- fan chart
+- pytest
+- make gedcom2html a function
 - beautify CSS
 - home button
 - box with notes
@@ -27,5 +27,4 @@ python gedcom2html.py myfile.ged
    * -set_main_person
 - list of people in right column
 - parental tree with collapsable CSS boxes using jquery
-- fan tree
 - improve age calculation
