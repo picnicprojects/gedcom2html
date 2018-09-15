@@ -10,8 +10,8 @@ python gedcom2html.py myfile.ged
 - [famousfamilytrees](http://famousfamilytrees.blogspot.com/?m=1) for the demo gedcom files
 ## To do
 - fan chart
-- pytest
 - make gedcom2html a function
+- pytest
 - beautify CSS
 - home button
 - box with notes
