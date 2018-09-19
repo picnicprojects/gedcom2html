@@ -24,6 +24,7 @@
 
 import re as regex
 from sys import version_info
+from datetime import datetime
 
 __all__ = ["Gedcom", "Element", "GedcomParseError"]
 
@@ -122,9 +123,12 @@ GEDCOM_TAG_SOURCE = "SOUR"
 
 # A family name passed on or used by members of a family.
 GEDCOM_TAG_SURNAME = "SURN"
+GEDCOM_TAG_NICKNAME = "NICK"
 
 # An individual in the role as a mother and/or married woman.
 GEDCOM_TAG_WIFE = "WIFE"
+GEDCOM_TAG_TITLE = "TITL"
+GEDCOM_TAG_PUBLICATION = "PUBL"
 
 
 class Gedcom:
@@ -741,6 +745,12 @@ class Element:
         """
         return self.get_tag() == GEDCOM_TAG_INDIVIDUAL
 
+    def is_source(self):
+        """Check if this element is a source
+        :rtype: bool
+        """
+        return self.get_tag() == GEDCOM_TAG_SOURCE
+
     def is_family(self):
         """Check if this element is a family
         :rtype: bool
@@ -883,12 +893,31 @@ class Element:
             return True
         return False
 
+    def get_source_title(self):
+        title = ""
+        if not self.is_source():
+            return title
+        for child in self.get_child_elements():
+            if child.get_tag() == GEDCOM_TAG_TITLE:
+                title = child.get_value()
+        return title
+
+    def get_source_publication(self):
+        publication = ""
+        if not self.is_source():
+            return publication
+        for child in self.get_child_elements():
+            if child.get_tag() == GEDCOM_TAG_PUBLICATION:
+                publication = child.get_value()
+        return publication
+
     def get_name(self):
-        """Return a person's names as a tuple: (first, last)
+        """Return a person's names as a tuple: (first, last, nick)
         :rtype: tuple
         """
         first = ""
         last = ""
+        nick = ""
         if not self.is_individual():
             return first, last
         for child in self.get_child_elements():
@@ -907,7 +936,12 @@ class Element:
                             first = childOfChild.get_value()
                         if childOfChild.get_tag() == GEDCOM_TAG_SURNAME:
                             last = childOfChild.get_value()
-        return first, last
+                        if childOfChild.get_tag() == GEDCOM_TAG_NICKNAME:
+                            nick = childOfChild.get_value()
+                for childOfChild in child.get_child_elements():
+                    if childOfChild.get_tag() == GEDCOM_TAG_NICKNAME:
+                        nick = childOfChild.get_value()
+        return first, last, nick
 
     def get_gender(self):
         """Return the gender of a person in string format
@@ -1133,3 +1167,92 @@ class Element:
             result += ' ' + self.get_value()
         result += self.__crlf
         return result
+
+        
+class Source:
+   def __init__(self):
+      pass
+      
+class Family:
+   def __init__(self):
+      self.child_id = []
+      self.spouse_id = ""
+      pass
+
+class Person:
+   def __init__(self):
+      self.id = ""
+      self.first_name = ""
+      self.surname = ""
+      self.nick_name = ""
+      self.notes = ""
+      self.text = ""
+      self.occupation = ""
+      self.gender = ""
+      self.birth_date = False
+      self.birth_place = ""
+      self.death_date = False
+      self.death_place = ""
+      self.parent_id = []
+      self.family = []
+      pass
+      
+class GedcomParser:
+   def __init__(self, filepath):
+      self.__g = Gedcom(filepath)
+      
+   def get_sources(self):
+      sources = {}
+      for e in self.__g.get_element_list():
+         if e.is_source():
+            s = Source()
+            s.id = self.__element_get_id(e)
+            s.title = e.get_source_title()
+            s.publication = e.get_source_publication()
+            sources[s.id] = s
+      return(sources)
+      
+   def get_persons(self):
+      persons = {}
+      for e in self.__g.get_element_list():
+         if e.is_individual():
+            person = Person()
+            person.id = self.__element_get_id(e)
+            person.first_name = e.get_name()[0]
+            person.surname = e.get_name()[1]
+            person.nick_name = e.get_name()[2]
+            person.notes = e.get_notes()
+            person.occupation = e.get_occupation()
+            person.gender = e.get_gender()
+            try:
+               person.birth_date = datetime.strptime(e.get_birth_data()[0], '%d %b %Y').date()
+            except:
+               pass
+            try:
+               person.death_date = datetime.strptime(e.get_death_data()[0], '%d %b %Y').date()
+            except:
+               pass
+            # parents
+            for parent_element in self.__g.get_parents(e):
+               person.parent_id.append(self.__element_get_id(parent_element))
+            # families
+            for family_element in self.__g.get_families(e):
+               family = Family()
+               for tag in ['HUSB','WIFE']:
+                  p = self.__g.get_family_members(family_element, tag)
+                  if len(p) > 0:
+                     spouse_id = self.__element_get_id(p[0])
+                     if (person.id <> spouse_id):
+                           family.spouse_id = spouse_id 
+               pl = self.__g.get_family_members(family_element, 'CHIL')
+               if len(pl) > 0:
+                  for p in pl:
+                     family.child_id.append(self.__element_get_id(p))
+               if len(family.spouse_id) > 0 or len(family.child_id) > 0:
+                  person.family.append(family)
+            # add dict to list            
+            persons[person.id] = person
+      return(persons)
+         
+   def __element_get_id(self, e):
+      return(e.get_pointer().replace("@",""))
