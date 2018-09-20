@@ -1171,13 +1171,13 @@ class Element:
         
 class Source:
    def __init__(self):
-      pass
+      self.title = ""
+      self.publication = ""
       
 class Family:
    def __init__(self):
       self.child_id = []
       self.spouse_id = ""
-      pass
 
 class Person:
    def __init__(self):
@@ -1195,7 +1195,6 @@ class Person:
       self.death_place = ""
       self.parent_id = []
       self.family = []
-      pass
       
 class GedcomParser:
    def __init__(self, filepath):

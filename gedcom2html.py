@@ -136,28 +136,41 @@ class Html:
    
    def write_footer(self, sources):
       self.__fid.write("</div><!-- row -->\n")
-      self.__fid.write("<footer>\n")
-      self.__fid.write("<center>\n")
-      self.__fid.write("<a href=''>%s</a> contains %d persons\n" % ( self.__filepath, len(self.persons)))
-      self.__fid.write("Sources:\n<ul>\n")
+      self.__fid.write("<div class='row'>\n")
+      self.__fid.write("<div class='col-sm-6'>\n")
+      self.__fid.write("<div class='well gedcominfo'>\n")
+      self.__fid.write("<h3>Gedcom file:</h3>\n")
+      path, fname = os.path.split(self.__filepath)
+      self.__fid.write("<a href='%s'>%s</a> contains %d persons\n" % (fname, fname , len(self.persons)))
+      self.__fid.write("<h3>Sources:</h3>\n")
+      self.__fid.write("<ul>\n")
       for index, s in sources.iteritems():
          self.__fid.write("   <li><a href='%s'>%s</a>\n" %(s.publication, s.title))
       self.__fid.write("</ul>\n")
+      self.__fid.write("</div><!-- well -->\n")
+      self.__fid.write("</div><!-- col -->\n")
+      self.__fid.write("<div class='col-sm-6'>\n")
+      self.__fid.write("<div class='well gedcominfo'>\n")
+      self.__fid.write("<center>\n")
       self.__fid.write("<a href='https://github.com/picnicprojects/gedcom2html'>gedcom2html</a>\n")
       self.__fid.write("</center>\n")
-      self.__fid.write("</footer>\n")
+      self.__fid.write("</div><!-- well -->\n")
+      self.__fid.write("</div><!-- col -->\n")
+      self.__fid.write("</div><!-- row -->\n")
       self.__fid.write("</div><!-- container -->\n")
       self.__fid.write("</body>\n")
       self.__fid.write("</html>\n")
       self.__fid.close()
 
-def copy_assets():
+def copy_assets(gedcom_file):
    try:
       shutil.rmtree('generated')
    except:
       pass
+   path, fname = os.path.split(gedcom_file)
    os.makedirs('generated/js')
    os.makedirs('generated/css')
+   shutil.copy2(gedcom_file, 'generated/'+fname)   
    shutil.copy2('gedcom2html.css','generated/css/')   
    shutil.copy2('gedcom2html.js', 'generated/js/')
    shutil.copy2('assets/css/font-awesome.min.css', 'generated/css/')
@@ -207,7 +220,7 @@ def create_strings(p):
    
    
 def gedcom2html(file_path):
-   copy_assets()
+   copy_assets(file_path)
    g = GedcomParser(file_path)
    persons = g.get_persons()
    sources = g.get_sources()

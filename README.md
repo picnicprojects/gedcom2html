@@ -4,7 +4,7 @@
 python gedcom2html.py myfile.ged
 ```
 ## Examples
-* [Dutch Royal Family](//picnicprojects.com/dutchroyalfamily/)
+* [Dutch Royal Family](//picnicprojects.com/gedcom2html/dutchroyalfamily/)
 ## Special Thanks
 - gedcom2html uses [gedcom.py](https://github.com/nickreynke/python-gedcom) by Nick Reynke to parse the gedcom file
 - [famousfamilytrees](http://famousfamilytrees.blogspot.com/?m=1) for the demo gedcom files
