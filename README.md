@@ -1,4 +1,4 @@
-# gedcom2html, a python script to convert gedcom files to html files using bootstrap and jquery.
+# gedcom2html: Convert gedcom to html with bootstrap, d3 and jquery using python
 ## Usage
 ```
 python gedcom2html.py myfile.ged
@@ -9,14 +9,13 @@ python gedcom2html.py myfile.ged
 - gedcom2html uses [gedcom.py](https://github.com/nickreynke/python-gedcom) by Nick Reynke to parse the gedcom file
 - [famousfamilytrees](http://famousfamilytrees.blogspot.com/?m=1) for the demo gedcom files
 ## To do
-- fan chart
-- make gedcom2html a function
-- pytest
-- beautify CSS
+- fix fan chart
+- fix jquery for parents
+- beautify CSS / colors
+- add full gedcom chart
+- add descendants chart
 - home button
-- box with notes
 - link to index.html with main person
-- small box with gedcom statistics
 - command line options
    * -private
       * none
@@ -25,6 +24,7 @@ python gedcom2html.py myfile.ged
    * -output-dir
    * -language
    * -set_main_person
+   * -statcounter
 - list of people in right column
 - parental tree with collapsable CSS boxes using jquery
 - improve age calculation
