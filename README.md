@@ -1,10 +1,17 @@
 # gedcom2html: Convert gedcom to html with bootstrap, d3 and jquery using python
 ## Usage
 ```
+python gedcom2html_test.py
+```
+or
+```
 python gedcom2html.py myfile.ged
 ```
 ## Examples
 * [Dutch Royal Family](//picnicprojects.com/gedcom2html/dutchroyalfamily/)
+## Features
+- one html page for each individual in the gedcom file
+- a parental fan chart for each individual
 ## Special Thanks
 - gedcom2html uses [gedcom.py](https://github.com/nickreynke/python-gedcom) by Nick Reynke to parse the gedcom file
 - [famousfamilytrees](http://famousfamilytrees.blogspot.com/?m=1) for the demo gedcom files
