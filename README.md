@@ -1,4 +1,4 @@
-# gedcom2html: Convert gedcom to html with bootstrap, d3 and jquery using python
+# Convert gedcom to html with bootstrap, d3 and jquery using python
 ## Usage
 ```
 python gedcom2html_test.py
