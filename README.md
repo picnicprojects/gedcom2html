@@ -21,6 +21,7 @@ python gedcom2html.py myfile.ged
 - beautify CSS / colors
 - add full gedcom chart
 - add descendants chart
+- add title
 - home button
 - link to index.html with main person
 - command line options

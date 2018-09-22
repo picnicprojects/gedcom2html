@@ -178,27 +178,29 @@ class Html:
       self.__fid.write("</script>\n")
    
    def write_footer(self, sources):
-      self.__fid.write("<footer class='gedcominfo'>\n")
-      self.__fid.write("<div class='row'>\n")
+      # self.__fid.write("<footer class='gedcominfo'>\n")
+      self.__fid.write("<div class='row well well-sm gedcominfo'>\n")
+      # self.__fid.write("<div class='well'>\n")
       self.__fid.write("<div class='col-sm-6'>\n")
-      self.__fid.write("<h3>Gedcom file:</h3>\n")
       path, fname = os.path.split(self.__filepath)
-      self.__fid.write("<a href='%s'>%s</a> contains %d all_persons\n" % (fname, fname , len(self.all_persons)))
-      self.__fid.write("<h3>Sources:</h3>\n")
-      self.__fid.write("<ul>\n")
-      for index, s in sources.iteritems():
-         self.__fid.write("   <li><a href='%s'>%s</a>\n" %(s.publication, s.title))
-      self.__fid.write("</ul>\n")
+      self.__fid.write("Gedcom file <a href='%s'>%s</a> contains %d persons\n" % (fname, fname , len(self.all_persons)))
+      if len(sources) > 0:
+         self.__fid.write("<b>Sources:</b>\n")
+         self.__fid.write("<ul>\n")
+         for index, s in sources.iteritems():
+            self.__fid.write("   <li><a href='%s'>%s</a>\n" %(s.publication, s.title))
+         self.__fid.write("</ul>\n")
       # self.__fid.write("</div><!-- well -->\n")
       self.__fid.write("</div><!-- col -->\n")
       self.__fid.write("<div class='col-sm-6'>\n")
-      # self.__fid.write("<div class='well gedcominfo'>\n")
       self.__fid.write("<center>\n")
-      self.__fid.write("<a href='https://github.com/picnicprojects/gedcom2html'>gedcom2html</a>\n")
       self.__fid.write("</center>\n")
       # self.__fid.write("</div><!-- well -->\n")
       self.__fid.write("</div><!-- col -->\n")
       self.__fid.write("</div><!-- row -->\n")
+      # self.__fid.write("</footer>\n")
+      self.__fid.write("<footer>\n")
+      self.__fid.write("Made with <a href='https://github.com/picnicprojects/gedcom2html'>gedcom2html</a> by <a href='https://www.picnicprojects.com'>Picnic Projects</a>\n")
       self.__fid.write("</footer>\n")
       self.__fid.write("</div><!-- container -->\n")
       self.__fid.write("</body>\n")
@@ -283,11 +285,11 @@ def gedcom2html(file_path):
    id_list.sort()
    for id in id_list:
       create_strings(all_persons[id])
+   write_index_html(all_persons[id_list[0]].link)
    for id in id_list:
       p = all_persons[id]
       h = Html(all_persons, p, sources, file_path)
       # stop
-   write_index_html(all_persons[id_list[0]].link)
    
 if __name__ == "__main__":
    outputdir = ''

@@ -18,20 +18,20 @@ span.dates{
    color:#333;
 }
 
-footer{
-   color:#999;
-   background-color:#eee;
-   padding-top:25px;
-   height:300px;
-   width:100%;
-}
-
 svg {
   margin-top: 32px;
   border: 1px solid #aaa;
 }
 
+footer{
+   text-align:right;
+   font-size:12px;
+   font-style:bold;
+}
 
+footer a{
+   text-decoration: underline;
+}
 
 .person rect {
   fill: #fff;

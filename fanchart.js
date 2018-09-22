@@ -1,9 +1,5 @@
 function drawFanChart(json){
-   var width = 1024;
-
-   if (width > $("#column-right").width()) {
-      width = $("#column-right").width();
-   }
+   var width = Math.min(1024, $("#column-right").width());
 
    var height = width,
       radius = width / 2,
@@ -11,7 +7,7 @@ function drawFanChart(json){
       y = d3.scale.pow().exponent(1.3).domain([0, 1]).range([0, radius]),
       padding = 5,
       duration = 1000;
-
+      
    var div = d3.select("#fanchart");
 
    var vis = div.append("svg")
@@ -20,22 +16,27 @@ function drawFanChart(json){
       .style("border", "0px")
       .append("g")
       .attr("transform", "translate(" + [radius + padding, radius + padding] + ")");
-
-   var partition = d3.layout.partition()
-      .sort(null)
-      .value(function(d) { return .5; });
-
+      
+   var palette = d3.scale.category20c();
+   
+   var partition = d3.layout.partition();
+      // .sort(null)
+      // .value(function(d) { return .5; });
       
    var arc = d3.svg.arc()
       .startAngle(function(d)  {
          a = x(d.x);
          return a;})
       .endAngle(function(d){
-         dx = 1/Math.pow(2,d.depth-1);
-         a = x(d.x + dx);
+         a = x(d.x + d.dx);
          return a;})
       .innerRadius(function(d) {
-         r = y(d.y);
+         if (d.depth == 1){
+            r = 0;
+         }
+         else{
+            r = y(d.y);
+         }
          return r; })
       .outerRadius(function(d) {
          r = y(d.y + d.dy);
@@ -44,6 +45,7 @@ function drawFanChart(json){
    var nodes = partition.nodes({children: json});
    nodes.sort(function(a,b) {return a.generation - b.generation;});
    nodes.forEach(function(d) {
+      d.dx = 1/Math.pow(2,d.depth-1);
       if (d.generation > 1){
             if (d.gender == "F"){
                d.x = d.parent.x + 1/Math.pow(2,d.depth-1);
@@ -71,16 +73,9 @@ function drawFanChart(json){
       .append("text")
          .style("fill-opacity", 1)
          .style("fill", "#000")
-         // .attr("text-anchor", function(d) {return x(d.x + d.dx / 2) > Math.PI ? "end" : "start";})
-         // .attr("dy", ".2em")
-         .attr("font-size", "8px")
-         .attr("transform", function(d) {
-            var multiline = (d.name || "").split(" ").length > 1,
-              multangle = d.depth == 1 ? 90 : 180,
-              angle = x(d.x + d.dx / 2) * multangle / Math.PI - 90,
-              rotate = angle + (multiline ? -.5 : 0);
-            return "rotate(" + rotate + ")translate(" + (y(d.y) + padding) + ")rotate(" + (angle > 90 ? -180 : 0) + ")";
-         });
+         .attr("text-anchor", "middle")
+         .attr("transform", transformText)
+         .attr("font-size", "8px");
      
    textEnter.append("tspan")
       .attr("x", 0)
@@ -96,12 +91,28 @@ function drawFanChart(json){
       .attr("dy", "1em")
       .text(function(d) {return d.depth ? d.name.split(" ")[2] || "" : "";});
 
-   function colour(d) {
-      if (d.gender == 'M'){
-         c = "rgb(0,255,0)";
+   function transformText(d){
+      if (d.depth == 1){
+         R1 = 0, R2 = 0, TX = 0, TY = 0;
       }
       else{
-         c = "rgb(255,0,0)";
+         console.log(d);
+         R1 = 0;
+         a = x(d.x + 0.5 * d.dx);
+         r = y(d.y + 0.5 * d.dy);
+         TX = r*Math.sin(a);
+         TY = -r*Math.cos(a);
+         R2 = 0;
+         console.log(d.x,d.dx);
+         console.log(a, TX,TY);
+      }
+      return "rotate("+R1+")translate("+TX+","+TY+")rotate("+R2+")";
+   };
+      
+   function colour(d) {
+      c = palette(d.depth);
+      if ((d.gender == 'M') && (d.depth > 1)){
+         c = d3.rgb(c).brighter().toString();
       }
       return c;
    }
