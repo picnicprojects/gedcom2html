@@ -102,9 +102,8 @@ function drawFanChart(json){
          r = y(d.y + 0.5 * d.dy);
          TX = r*Math.sin(a);
          TY = -r*Math.cos(a);
-         R2 = 0;
-         console.log(d.x,d.dx);
-         console.log(a, TX,TY);
+         R2 = 360* a / (2 * Math.PI);
+         console.log(a, Math.PI, R2);
       }
       return "rotate("+R1+")translate("+TX+","+TY+")rotate("+R2+")";
    };

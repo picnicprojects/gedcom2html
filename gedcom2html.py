@@ -178,27 +178,23 @@ class Html:
       self.__fid.write("</script>\n")
    
    def write_footer(self, sources):
-      # self.__fid.write("<footer class='gedcominfo'>\n")
       self.__fid.write("<div class='row well well-sm gedcominfo'>\n")
-      # self.__fid.write("<div class='well'>\n")
       self.__fid.write("<div class='col-sm-6'>\n")
       path, fname = os.path.split(self.__filepath)
-      self.__fid.write("Gedcom file <a href='%s'>%s</a> contains %d persons\n" % (fname, fname , len(self.all_persons)))
+      self.__fid.write("Gedcom file <a href='%s'>%s</a> contains %d persons<br>\n" % (fname, fname , len(self.all_persons)))
+      # self.__fid.write("Main person: <a href='%s'>%s</a>\n" % (self.all_persons[self.options.poi_id].link, self.all_persons[self.options.poi_id].short_name))
       if len(sources) > 0:
-         self.__fid.write("<b>Sources:</b>\n")
+         self.__fid.write("<br><b>Sources:</b>\n")
          self.__fid.write("<ul>\n")
          for index, s in sources.iteritems():
             self.__fid.write("   <li><a href='%s'>%s</a>\n" %(s.publication, s.title))
          self.__fid.write("</ul>\n")
-      # self.__fid.write("</div><!-- well -->\n")
       self.__fid.write("</div><!-- col -->\n")
       self.__fid.write("<div class='col-sm-6'>\n")
       self.__fid.write("<center>\n")
       self.__fid.write("</center>\n")
-      # self.__fid.write("</div><!-- well -->\n")
       self.__fid.write("</div><!-- col -->\n")
       self.__fid.write("</div><!-- row -->\n")
-      # self.__fid.write("</footer>\n")
       self.__fid.write("<footer>\n")
       self.__fid.write("Made with <a href='https://github.com/picnicprojects/gedcom2html'>gedcom2html</a> by <a href='https://www.picnicprojects.com'>Picnic Projects</a>\n")
       self.__fid.write("</footer>\n")
@@ -207,6 +203,10 @@ class Html:
       self.__fid.write("</html>\n")
       self.__fid.close()
 
+class options:
+   def __init__(self):
+      pass
+      
 def copy_assets(gedcom_file):
    try:
       shutil.rmtree('generated')
