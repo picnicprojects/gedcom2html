@@ -1252,6 +1252,6 @@ class GedcomParser:
             # add dict to list            
             persons[person.id] = person
       return(persons)
-         
+
    def __element_get_id(self, e):
       return(e.get_pointer().replace("@",""))

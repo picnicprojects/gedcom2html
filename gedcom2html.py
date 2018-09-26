@@ -2,25 +2,52 @@ from gedcomParser import GedcomParser
 from datetime import datetime
 import codecs, os, shutil, string, sys, getopt
 
+def calc_color(type, level = 0, gender = 'M'):
+   level_max = 10.0
+   # level = 3
+   if type == 0: # not related
+      c = '#aaa'
+   elif type == 1: # poi
+      c = '#00f'
+   elif type == 2: # parent
+      c = '#f00'
+      # print level/level_max
+      x = 10 + 240 * (1 - (level / level_max))
+      c = "rgb(%d,0,0)" % int(x)
+      # print level, c
+      # stop
+   elif type == 3: # child
+      c = '#0f0'
+   else:
+      c = '#000' # error
+   return c
+
 class Html:
-   def __init__(self, all_persons, p, sources, file_path):
+   def __init__(self, p, all_persons, sources, file_path):
       self.person = p
       self.all_persons = all_persons
+      for id, p2 in self.all_persons.iteritems():
+         self.all_persons[id].color = calc_color(0)
+      p.color = calc_color(1)
       self.__filepath = file_path
       self.__fid = codecs.open('generated/' + p.link, encoding='utf-8',mode='w')
       self.write_header()
       self.__fid.write("<div class='row'>\n")
       self.write_person()
-      self.__fid.write("</div><!-- row -->\n")
-      self.__fid.write("<div class='row'>\n")
-      self.__fid.write("<div class='col-sm-8'>\n")
       self.write_parents()
       self.write_families()
       self.write_siblings()
-      self.__fid.write("</div><!-- col -->\n")
-      self.__fid.write("<div class='col-sm-4' id='column-right'>\n")
+      self.__fid.write("</div><!-- row -->\n")
+      self.__fid.write("<div class='row'>\n")
+      self.__fid.write("<div class='col-sm-4' id='column-left'>\n")
       self.write_fan_chart()
       self.__fid.write("</div><!-- col -->\n")
+      self.__fid.write("<div class='col-sm-4' id='column-right'>\n")
+      self.write_chart_navigator()
+      self.__fid.write("</div><!-- col -->\n")
+      # self.__fid.write("<div class='col-sm-4'>\n")
+      # self.write_fan_chart()
+      # self.__fid.write("</div><!-- col -->\n")
       self.__fid.write("</div><!-- row -->\n")
       self.write_footer(sources)
  
@@ -38,10 +65,10 @@ class Html:
       self.__fid.write("<link rel='stylesheet' type='text/css' href='css/font-awesome.min.css' />\n")
       self.__fid.write("<link rel='stylesheet' type='text/css' href='css/bootstrap.min.css' />\n")
       self.__fid.write("<script type='text/javascript' src='js/jquery-3.1.1.min.js'></script>\n")
-      self.__fid.write("<script type='text/javascript' src='js/d3.min.js'></script>\n")
+      self.__fid.write("<script type='text/javascript' src='js/d3.v4.min.js'></script>\n")
       self.__fid.write("<script type='text/javascript' src='js/bootstrap.min.js'></script>\n")
-      self.__fid.write("<script type='text/javascript' src='js/gedcom2html.js'></script>\n")
-      self.__fid.write("<script type='text/javascript' src='js/fanchart.js'></script>\n")
+      self.__fid.write("<script type='text/javascript' src='js/gedcom2html.v4.js'></script>\n")
+      # self.__fid.write("<script type='text/javascript' src='js/fanchart.js'></script>\n")
       # self.__fid.write("<script type='text/javascript' src='../js/d3.min.js'></script>\n")
       # self.__fid.write("<script type='text/javascript' src='../js/d3plus.min.js'></script>\n")
       # self.__fid.write("<script type='text/javascript' src='../js/d3tree.js'></script>\n")
@@ -62,10 +89,11 @@ class Html:
             arrow = "<i class='fa fa-arrow-circle-right' id='parent_%s' onclick='toggle_tree(\"parent_%s\")'></i>" % (p.id, p.id)
          self.__fid.write("%s   <li>%s" % (s, arrow))
          self.__fid.write(" %s\n" % (p.string_long))
+         self.all_persons[p.id].color = calc_color(2, level, self.all_persons[p.id].gender)
          if len(self.all_persons[p.id].parent_id) > 0:
             self.__write_parents(p.id, level + 1)
       self.__fid.write("%s</ul>\n" % s)
-      
+
    def __write_family(self, id, level):
       white_space = '   '*(level+1)
       for index, family in enumerate(self.all_persons[id].family):
@@ -86,6 +114,7 @@ class Html:
                self.__fid.write("%s<ul class='tree'>\n" % (white_space))
             for child_id in family.child_id:
                arrow = ""
+               self.all_persons[child_id].color = calc_color(3, level, self.all_persons[child_id].gender)
                if level == 0:
                   if len(self.all_persons[child_id].family) > 0:
                      arrow = "<i class='fa fa-arrow-circle-right' id='children_%s' onclick='toggle_tree(\"children_%s\")'></i>" % (child_id, child_id)
@@ -141,11 +170,11 @@ class Html:
          p = self.all_persons[id]
          white_space = '   '*level
          white_space2 = '   '*(level-1)
-         
          self.__fid.write('%s{\n'% white_space2)
          self.__fid.write('%s"name": "%s",\n'% (white_space, p.shortest_name))
          self.__fid.write('%s"generation": "%d",\n'% (white_space, level))
          self.__fid.write('%s"gender": "%s",\n'% (white_space, p.gender))
+         self.__fid.write('%s"color": "%s",\n'% (white_space, p.color))
          self.__fid.write('%s"href": "%s",\n'% (white_space, p.link))
          if p.birth_date == False:
             self.__fid.write('%s"born": "",\n' % (white_space))
@@ -155,18 +184,40 @@ class Html:
          self.__fid.write('%s"gramps_id": "%s",\n'% (white_space, id))
          if len(p.parent_id) > 0:
             self.__fid.write('%s"children": [\n'% white_space)
+            i = 0
             for pid in p.parent_id:
                self.__write_json_for_fan_chart(pid, level + 1)
+               if i == 0:
+                  self.__fid.write('%s,\n'% white_space2)
+               i = i + 1
             self.__fid.write("%s]\n"% white_space)
-         self.__fid.write("%s},\n"% white_space2)
+         self.__fid.write("%s}\n"% white_space2)
          
    def write_fan_chart(self):
       self.__fid.write("<div id='fanchart'></div>\n")
       self.__fid.write("<script>\n")
-      self.__fid.write("var json = [")
+      self.__fid.write("var json = ")
       self.__write_json_for_fan_chart(self.person.id, 1)
-      self.__fid.write("];\n")
+      self.__fid.write(";\n")
       self.__fid.write("drawFanChart(json);\n")
+      self.__fid.write("</script>\n")
+      
+   def write_chart_navigator(self):
+      self.__fid.write("<div id='chart_navigator'></div>\n")
+      self.__fid.write("<script>\n")
+      self.__fid.write('var jsonNavigator = {\n   "nodes": [\n')
+      for id, p in self.all_persons.iteritems():
+         # print p.color
+         self.__fid.write('      {"id": "%s", "birth_year":"%s", "url":"%s", "color": "%s", "group": %d},\n' %(p.id, p.birth_year, p.link, p.color, 1))
+      self.__fid.write('   ],\n   "links":[\n')
+      for id, p in self.all_persons.iteritems():
+         for parent_id in p.parent_id:
+            self.__fid.write('      {"source": "%s", "target": "%s", "type": "parent"},\n' %(p.id, parent_id))
+         for index, family in enumerate(self.all_persons[id].family):
+            if len(family.spouse_id) > 0:
+               self.__fid.write('      {"source": "%s", "target": "%s", "type": "spouse"},\n' %(p.id, family.spouse_id))
+      self.__fid.write("   ]\n};\n")
+      self.__fid.write("drawChartNavigator(jsonNavigator);\n")
       self.__fid.write("</script>\n")
          
    def write_hourglass_tree(self, j):
@@ -217,11 +268,11 @@ def copy_assets(gedcom_file):
    os.makedirs('generated/css')
    shutil.copy2(gedcom_file, 'generated/'+fname)   
    shutil.copy2('gedcom2html.css','generated/css/')   
-   shutil.copy2('gedcom2html.js', 'generated/js/')
-   shutil.copy2('fanchart.js', 'generated/js/')
+   shutil.copy2('gedcom2html.v4.js', 'generated/js/')
+   # shutil.copy2('fanchart.js', 'generated/js/')
    shutil.copy2('assets/css/font-awesome.min.css', 'generated/css/')
    shutil.copy2('assets/css/bootstrap.min.css', 'generated/css/')
-   shutil.copy2('assets/js/d3.min.js', 'generated/js/')
+   shutil.copy2('assets/js/d3.v4.min.js', 'generated/js/')
    shutil.copy2('assets/js/bootstrap.min.js', 'generated/js/')
    shutil.copy2('assets/js/jquery-3.1.1.min.js', 'generated/js/')
    shutil.copytree('assets/font-awesome/fonts', 'generated/fonts/')
@@ -251,8 +302,10 @@ def create_strings(p):
       
    #string_dates
    s = ""
+   p.birth_year = ""
    if p.birth_date <> False:
       s = s + "<i class='fa fa-star'></i> %s " % '{0.day:02d}-{0.month:02d}-{0.year:4d}'.format(p.birth_date)
+      p.birth_year = '{0.year:4d}'.format(p.birth_date)
    if p.death_date <> False:
       s = s + "<i class='fa fa-plus'></i> %s " % '{0.day:02d}-{0.month:02d}-{0.year:4d}'.format(p.death_date)
    if p.birth_date <> False and p.death_date <> False:
@@ -288,7 +341,7 @@ def gedcom2html(file_path):
    write_index_html(all_persons[id_list[0]].link)
    for id in id_list:
       p = all_persons[id]
-      h = Html(all_persons, p, sources, file_path)
+      h = Html(p, all_persons, sources, file_path)
       # stop
    
 if __name__ == "__main__":

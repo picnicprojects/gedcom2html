@@ -1,3 +1,118 @@
+function drawChartNavigator(jsonNavigator){
+   var width = Math.min(1024, $("#column-right").width());
+   var height = width, 
+   radius = 15,  
+   padding = 0;
+
+   
+   var div = d3.select("#chart_navigator");
+
+   var svg = div.append("svg")
+      .attr("viewBox", "0 0 1000 1000")
+      .attr("width", width + padding * 2)
+      .attr("height", height + padding * 2)
+      .append("g")
+      .attr("transform", "translate("+width/2+","+height/2+")");
+      // .attr("transform", "scale(.1)")
+
+   var color = d3.scaleOrdinal(d3.schemeCategory20);
+   
+    var simulation = d3.forceSimulation()
+    .force("link", d3.forceLink().id(function(d) { return d.id; }))
+    .force("charge", d3.forceManyBody())
+    // .force("forceX", d3.forceX().strength(.1).x(width * .5))
+    // .force("forceY", d3.forceY().strength(.1).y(height * .5))
+    .force("center", d3.forceCenter(width / 2, height / 2));
+       
+   var nodes = jsonNavigator.nodes;
+   var links = jsonNavigator.links;
+   
+   calcFixY();
+   
+   function calcFixY(){
+      min = 100000;
+      max = 0;
+      nodes.forEach(function(d) {
+         if (d.birth_year.length > 0){
+            min = Math.min(min, parseInt(d.birth_year));
+            max = Math.max(max, parseInt(d.birth_year));
+         }
+      });
+      nodes.forEach(function(d) {
+         if (d.birth_year.length > 0){
+            d.yFixed = height * (parseInt(d.birth_year) - min) / (max - min);
+         }
+      });
+   };
+   
+   var link = svg.append("g")
+      .attr("class", "link")
+    .selectAll("line")
+    .data(links)
+    .enter().append("line")
+      .attr("stroke-width", 1);
+
+      
+      
+   var node = svg.append("g")
+      .attr("class", "nodes")
+    .selectAll("circle")
+    .data(nodes)
+    .enter().append("a")
+      .attr("xlink:href", function(d) {return d.url})
+    .append("circle")
+      .attr("r", 5)
+      .attr("fill", function(d) { return color(d.group); });
+      // .call(d3.drag()
+          // .on("start", dragstarted)
+          // .on("drag", dragged)
+          // .on("end", dragended));
+   
+   node.append("title")
+      .text(function(d) { return d.url; });
+
+   simulation
+      .nodes(nodes)
+      .on("tick", ticked);
+
+   simulation.force("link")
+      .links(links);
+
+   function ticked() {
+      nodes.forEach(function(d) {
+         if (d.birth_year.length > 0){
+            d.py = d.yFixed;
+            d.y  = d.yFixed;
+            // console.log(d.birth_year);
+         }
+      });
+        
+      link
+         .attr("x1", function(d) { return d.source.x; })
+         .attr("y1", function(d) { return d.source.y; })
+         .attr("x2", function(d) { return d.target.x; })
+         .attr("y2", function(d) { return d.target.y; });
+
+      node
+         .attr("cx", function(d) { return d.x; })
+         .attr("cy", function(d) { return d.y; });
+   }
+
+   // function dragstarted(d) {
+     // if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+     // d.fx = d.x, d.fy = d.y;
+   // }
+
+   // function dragged(d) {
+     // d.fx = d3.event.x, d.fy = d3.event.y;
+   // }
+
+   // function dragended(d) {
+     // if (!d3.event.active) simulation.alphaTarget(0);
+     // d.fx = null, d.fy = null;
+   // }
+};
+
 function drawFanChart(json){
    var width = Math.min(1024, $("#column-right").width());
 
@@ -96,14 +211,14 @@ function drawFanChart(json){
          R1 = 0, R2 = 0, TX = 0, TY = 0;
       }
       else{
-         console.log(d);
+         // console.log(d);
          R1 = 0;
          a = x(d.x + 0.5 * d.dx);
          r = y(d.y + 0.5 * d.dy);
          TX = r*Math.sin(a);
          TY = -r*Math.cos(a);
          R2 = 360* a / (2 * Math.PI);
-         console.log(a, Math.PI, R2);
+         // console.log(a, Math.PI, R2);
       }
       return "rotate("+R1+")translate("+TX+","+TY+")rotate("+R2+")";
    };
