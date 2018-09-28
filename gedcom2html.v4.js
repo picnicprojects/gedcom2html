@@ -219,7 +219,7 @@ function drawChartNavigator(jsonNavigator){
    }
 };
 
-function drawFanChart(json){
+function drawFanChart(json, boolAncestors){
    var width = Math.min(1024, $("#column-left").width());
 
    var height = width,
@@ -229,47 +229,61 @@ function drawFanChart(json){
       padding = 5,
       duration = 1000;
       
-   var div = d3.select("#fanchart");
-
+   if (boolAncestors)
+   {
+      var div = d3.select("#fanchart_ancestors");
+   }
+   else
+   {
+      var div = d3.select("#fanchart_descendants");
+   }
+      
    var svg = div.append("svg")
       .attr("width", width + padding * 2)
       .attr("height", height + padding * 2)
       .style("border", "0px")
       .append("g")
          .attr("transform", "translate(" + [radius + padding, radius + padding] + ")");
-      
-   
    
    var partition = d3.partition();
       
    var arc = d3.arc()
-    .startAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x0))); })
-    .endAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x1))); })
-       .innerRadius(function(d) { return Math.max(0, y(d.y0)); })
-       .outerRadius(function(d) { return Math.max(0, y(d.y1)); });
+      .startAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x0))); })
+      .endAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x1))); })
+      .innerRadius(function(d) { return Math.max(0, y(d.y0)); })
+      .outerRadius(function(d) { return Math.max(0, y(d.y1)); });
 
-   root = d3.hierarchy(json);
    
-   var nodes = partition(root).descendants();
-   
-   root.each(function(d){
-      dx = 1/Math.pow(2,d.depth);
-         if (d.depth == 0){
-            d.x0 = 0;
-            d.x1 = 1;
-         }
-         else{
-            if (d.data.gender == "F"){
-               d.x0 = d.parent.x0 + dx;
-               // d.x = d.parent.x 
+   if (boolAncestors)
+   {
+      root = d3.hierarchy(json);
+      var nodes = partition(root).descendants();
+      root.each(function(d){
+         dx = 1/Math.pow(2,d.depth);
+            if (d.depth == 0){
+               d.x0 = 0;
+               d.x1 = 1;
             }
             else{
-               d.x0 = d.parent.x0;
+               if (d.data.gender == "F"){
+                  d.x0 = d.parent.x0 + dx;
+                  // d.x = d.parent.x 
+               }
+               else{
+                  d.x0 = d.parent.x0;
+               }
+               d.x1 = d.x0 + dx;
             }
-            d.x1 = d.x0 + dx;
-         }
-   });
-
+      });
+   }
+   else
+   {
+   root = d3.hierarchy(json);
+      // .sum(function (d) { return d.size; });
+   root.count()
+      
+   var nodes = partition(root).descendants();
+   }
       
       
    var path = svg.selectAll("path")
@@ -288,7 +302,16 @@ function drawFanChart(json){
       .append("text")  
          .style("fill-opacity", 1)
          .style("fill", "#000")
-         .attr("text-anchor", "middle")
+         .attr("text-anchor", function(d){
+            if (d.depth > 5)
+            {
+               return 'left';
+            }
+            else
+            {
+               return 'middle';
+            }
+         })
          .attr("text-color", "#000")
          .text(function(d){return d.data.name;})
          .attr("transform", transformText)
@@ -301,20 +324,23 @@ function drawFanChart(json){
       else{
          R1 = 0;
          a = x(d.x0 + 0.5 * (d.x1 - d.x0));
-         r = y(d.y0 + 0.5 * (d.y1 - d.y0));
+         if (d.depth > 5)
+         {
+            r = y(d.y0);
+         }
+         else
+         {
+            r = y(d.y0 + 0.5 * (d.y1 - d.y0));
+         }
          TX = r*Math.sin(a);
          TY = -r*Math.cos(a);
          R2 = 360* a / (2 * Math.PI);
+         if (d.depth > 5)
+         {
+            R2 = R2 - 90;
+         }
       }
       s = "rotate("+R1+")translate("+TX+","+TY+")rotate("+R2+")";
       return s;
    };
-      
-   function colour(d) {
-      c = palette(d.depth);
-      if ((d.gender == 'M') && (d.depth > 1)){
-         c = d3.rgb(c).brighter().toString();
-      }
-      return c;
-   }
 };

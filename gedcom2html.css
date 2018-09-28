@@ -5,6 +5,12 @@ ul li{
    list-style-type: none;
 }
 
+h3{
+   font-size:12px;
+   text-align:center;
+   font-weight:bold;
+}
+
 span.dates{
    color:#999;
 }
@@ -26,7 +32,7 @@ svg {
 footer{
    text-align:right;
    font-size:12px;
-   font-style:bold;
+   font-weight:bold;
 }
 
 footer a{
