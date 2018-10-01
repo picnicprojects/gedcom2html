@@ -1,6 +1,14 @@
 body {
 }
 
+.page-header{
+   margin:0px;
+   background-color:#777;
+   color:#bbb;
+   padding:0px;
+   text-align:center;
+}
+
 ul li{
    list-style-type: none;
 }

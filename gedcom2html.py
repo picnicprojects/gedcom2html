@@ -2,6 +2,7 @@ from gedcomParser import GedcomParser
 from datetime import datetime
 import codecs, os, shutil, string, sys, getopt
 
+
 def calc_color(type, level = 0, gender = 'M'):
    level_max = 10.0;
    if type == 0: # not related
@@ -19,13 +20,13 @@ def calc_color(type, level = 0, gender = 'M'):
    return c
 
 class Html:
-   def __init__(self, p, all_persons, sources, file_path):
+   def __init__(self, p, all_persons, sources, options):
       self.person = p
+      self.options = options
       self.all_persons = all_persons
       for id, p2 in self.all_persons.iteritems():
          self.all_persons[id].color = calc_color(0)
       p.color = calc_color(1)
-      self.__filepath = file_path
       self.__fid = codecs.open('generated/' + p.link, encoding='utf-8',mode='w')
       self.write_header()
       self.__fid.write("<div class='row'>\n")
@@ -54,8 +55,8 @@ class Html:
       self.__fid.write("<!DOCTYPE html>\n")
       self.__fid.write("<html lang='en'>\n")
       self.__fid.write("<head>\n")
-      self.__fid.write("<title>%s</title>\n" % self.person.first_name)
-      self.__fid.write("<meta name=\"description\" content=\"gedcom2html\" /><meta name='viewport' content='width=device-width, initial-scale=1.0'>\n")
+      self.__fid.write("<title>%s</title>\n" % self.person.short_name)
+      self.__fid.write("<meta name=\"description\" content=\"%s\" /><meta name='viewport' content='width=device-width, initial-scale=1.0'>\n" % self.options.title) 
       self.__fid.write("<meta http-equiv='Content-Type' content='text/html;charset=utf-8' />\n")
       self.__fid.write("<link rel='stylesheet' type='text/css' href='css/bootstrap.min.css' />\n")
       self.__fid.write("<link rel='stylesheet' type='text/css' href='css/font-awesome.min.css' />\n")
@@ -66,6 +67,7 @@ class Html:
       self.__fid.write("<script type='text/javascript' src='js/gedcom2html.v4.js'></script>\n")
       self.__fid.write("</head>\n")
       self.__fid.write("<body>\n")
+      self.__fid.write("<div class='page-header'>%s</div>\n" % self.options.title)
       self.__fid.write("<div class='container'>\n")
       
    def __write_parents(self, id, level):
@@ -260,7 +262,7 @@ class Html:
    def write_footer(self, sources):
       self.__fid.write("<div class='row well well-sm gedcominfo'>\n")
       self.__fid.write("<div class='col-sm-6'>\n")
-      path, fname = os.path.split(self.__filepath)
+      path, fname = os.path.split(self.options.file_path)
       self.__fid.write("Gedcom file <a href='%s'>%s</a> contains %d persons<br>\n" % (fname, fname , len(self.all_persons)))
       # self.__fid.write("Main person: <a href='%s'>%s</a>\n" % (self.all_persons[self.options.poi_id].link, self.all_persons[self.options.poi_id].short_name))
       if len(sources) > 0:
@@ -279,115 +281,111 @@ class Html:
       self.__fid.write("Made with <a href='https://github.com/picnicprojects/gedcom2html'>gedcom2html</a> by <a href='https://www.picnicprojects.com'>Picnic Projects</a>\n")
       self.__fid.write("</footer>\n")
       self.__fid.write("</div><!-- container -->\n")
+      if len(self.options.sc_project) > 0:
+         self.__fid.write('<script type="text/javascript">var sc_project=%s; var sc_invisible=1; var sc_security="%s"; </script>\n' % (self.options.sc_project, self.options.sc_security))
+         self.__fid.write('<script type="text/javascript" src="https://www.statcounter.com/counter/counter.js" async></script>\n')
       self.__fid.write("</body>\n")
       self.__fid.write("</html>\n")
       self.__fid.close()
 
-class options:
+
+class Gedcom2html:
+   class Options:
+      def __init__(self):
+         self.input_file = ""
+         self.output_path = "generated"
+         self.sc_project = 0
+         self.sc_security = 0
+         self.title = "gedcom2html by picnic projects"
+         self.poi = ""
+
    def __init__(self):
-      pass
-      
-def copy_assets(gedcom_file):
-   try:
-      shutil.rmtree('generated')
-   except:
-      pass
-   path, fname = os.path.split(gedcom_file)
-   os.makedirs('generated/js')
-   os.makedirs('generated/css')
-   shutil.copy2(gedcom_file, 'generated/'+fname)   
-   shutil.copy2('gedcom2html.css','generated/css/')   
-   shutil.copy2('gedcom2html.v4.js', 'generated/js/')
-   # shutil.copy2('fanchart.js', 'generated/js/')
-   shutil.copy2('assets/css/font-awesome.min.css', 'generated/css/')
-   shutil.copy2('assets/css/bootstrap.min.css', 'generated/css/')
-   shutil.copy2('assets/js/d3.v4.min.js', 'generated/js/')
-   shutil.copy2('assets/js/bootstrap.min.js', 'generated/js/')
-   shutil.copy2('assets/js/jquery-3.1.1.min.js', 'generated/js/')
-   shutil.copytree('assets/font-awesome/fonts', 'generated/fonts/')
+      self.options = self.Options()
 
-def create_strings(p):
-   #shortest_name
-   if len(p.nick_name) > 0:
-      p.shortest_name = p.nick_name
-   else:
-      p.shortest_name = p.first_name.split(' ')[0]
-      
-   #short_name
-   p.short_name = "%s %s " % (p.shortest_name, p.surname)
- 
-   #string_short
-   if p.gender == 'M':
-      s = "<i class='fa fa-mars'></i>"
-   else:
-      s = "<i class='fa fa-venus'></i>"
-   p.string_short = "%s %s " % (s, p.short_name)
-      
-   #string_dates
-   s = ""
-   p.birth_year = ""
-   if p.birth_date <> False:
-      s = s + "<i class='fa fa-star'></i> %s " % '{0.day:02d}-{0.month:02d}-{0.year:4d}'.format(p.birth_date)
-      p.birth_year = '{0.year:4d}'.format(p.birth_date)
-   if p.death_date <> False:
-      s = s + "<i class='fa fa-plus'></i> %s " % '{0.day:02d}-{0.month:02d}-{0.year:4d}'.format(p.death_date)
-   if p.birth_date <> False and p.death_date <> False:
-   # self.death_date.year - self.birth_date.year - ((today.month, today.day) < (born.month, born.day))
-      age =  p.death_date.year - p.birth_date.year
-      if age == 0:
-         age =  p.death_date.month - p.birth_date.month
-         s = s + "(%s months) " % age
+   def __copy_assets(self, gedcom_file):
+      try:
+         shutil.rmtree('generated')
+      except:
+         pass
+      path, fname = os.path.split(gedcom_file)
+      os.makedirs('generated/js')
+      os.makedirs('generated/css')
+      shutil.copy2(gedcom_file, 'generated/'+fname)   
+      shutil.copy2('gedcom2html.css','generated/css/')   
+      shutil.copy2('gedcom2html.v4.js', 'generated/js/')
+      # shutil.copy2('fanchart.js', 'generated/js/')
+      shutil.copy2('assets/css/font-awesome.min.css', 'generated/css/')
+      shutil.copy2('assets/css/bootstrap.min.css', 'generated/css/')
+      shutil.copy2('assets/js/d3.v4.min.js', 'generated/js/')
+      shutil.copy2('assets/js/bootstrap.min.js', 'generated/js/')
+      shutil.copy2('assets/js/jquery-3.1.1.min.js', 'generated/js/')
+      shutil.copytree('assets/font-awesome/fonts', 'generated/fonts/')
+
+   def __create_strings(self, p):
+      #shortest_name
+      if len(p.nick_name) > 0:
+         p.shortest_name = p.nick_name
       else:
-         s = s + "(%s years) " % age
-   p.string_dates = s
+         p.shortest_name = p.first_name.split(' ')[0]
+         
+      #short_name
+      p.short_name = "%s %s " % (p.shortest_name, p.surname)
+    
+      #string_short
+      if p.gender == 'M':
+         s = "<i class='fa fa-mars'></i>"
+      else:
+         s = "<i class='fa fa-venus'></i>"
+      p.string_short = "%s %s " % (s, p.short_name)
+         
+      #string_dates
+      s = ""
+      p.birth_year = ""
+      if p.birth_date <> False:
+         s = s + "<i class='fa fa-star'></i> %s " % '{0.day:02d}-{0.month:02d}-{0.year:4d}'.format(p.birth_date)
+         p.birth_year = '{0.year:4d}'.format(p.birth_date)
+      if p.death_date <> False:
+         s = s + "<i class='fa fa-plus'></i> %s " % '{0.day:02d}-{0.month:02d}-{0.year:4d}'.format(p.death_date)
+      if p.birth_date <> False and p.death_date <> False:
+      # self.death_date.year - self.birth_date.year - ((today.month, today.day) < (born.month, born.day))
+         age =  p.death_date.year - p.birth_date.year
+         if age == 0:
+            age =  p.death_date.month - p.birth_date.month
+            s = s + "(%s months) " % age
+         else:
+            s = s + "(%s years) " % age
+      p.string_dates = s
+         
+      #link
+      # s = "%s_%s_%s.html" % (p.id, p.first_name, p.surname) 
+      s = "%s_%s.html" % (p.id, p.shortest_name) 
+      s = s.replace(' ','_')
+      valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
+      p.link = ''.join(c for c in s if c in valid_chars)
       
-   #link
-   # s = "%s_%s_%s.html" % (p.id, p.first_name, p.surname) 
-   s = "%s_%s.html" % (p.id, p.shortest_name) 
-   s = s.replace(' ','_')
-   valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
-   p.link = ''.join(c for c in s if c in valid_chars)
-   
-   #string_long
-   if len(p.string_dates) > 0:
-      p.string_long = ("<a href='%s'>%s</a> <span class='dates'>%s</span>" % (p.link, p.string_short, p.string_dates))
-   else:
-      p.string_long = ("<a href='%s'>%s</a>" % (p.link, p.string_short))
+      #string_long
+      if len(p.string_dates) > 0:
+         p.string_long = ("<a href='%s'>%s</a> <span class='dates'>%s</span>" % (p.link, p.string_short, p.string_dates))
+      else:
+         p.string_long = ("<a href='%s'>%s</a>" % (p.link, p.string_short))
 
-def write_index_html(link):
-   fid = open('generated/index.html','w')
-   fid.write('<meta http-equiv="refresh" content="0; url=%s">' % link)
-   fid.close
+   def __write_index_html(self, link):
+      fid = open('generated/index.html','w')
+      fid.write('<meta http-equiv="refresh" content="0; url=%s">' % link)
+      fid.close
+      
+   def write_html(self):
+      self.__copy_assets(self.options.file_path)
+      g = GedcomParser(self.options.file_path)
+      all_persons = g.get_persons()
+      sources = g.get_sources()
+      id_list = all_persons.keys()
+      id_list.sort()
+      for id in id_list:
+         self.__create_strings(all_persons[id])
+      self.__write_index_html(all_persons[id_list[0]].link)
+      for id in id_list:
+         p = all_persons[id]
+         h = Html(p, all_persons, sources, self.options)
+         # stop
    
-def gedcom2html(file_path):
-   copy_assets(file_path)
-   g = GedcomParser(file_path)
-   all_persons = g.get_persons()
-   sources = g.get_sources()
-   id_list = all_persons.keys()
-   id_list.sort()
-   for id in id_list:
-      create_strings(all_persons[id])
-   write_index_html(all_persons[id_list[0]].link)
-   for id in id_list:
-      p = all_persons[id]
-      h = Html(p, all_persons, sources, file_path)
-      # stop
-   
-if __name__ == "__main__":
-   outputdir = ''
-   try:
-      inputfile = sys.argv[1]
-      argv = sys.argv[2:] 
-      opts, args = getopt.getopt(argv,"ho:",["outputdir="])
-   except getopt.GetoptError:
-      print 'gedcom2html.py inputfile -o <outputfile>'
-      sys.exit(2)
-   for opt, arg in opts:
-      if opt == '-h':
-         print 'gedcom2html.py inputfile -o <outputdir>'
-         sys.exit()
-      elif opt in ("-o", "--outputdir"):
-         outputdir = arg
-   print inputfile
-   gedcom2html(inputfile)

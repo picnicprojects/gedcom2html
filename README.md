@@ -7,20 +7,17 @@ or
 ```
 python gedcom2html.py myfile.ged
 ```
-## Examples
+## An example says it all. So have a look at:
 * [Dutch Royal Family](//picnicprojects.com/gedcom2html/dutchroyalfamily/)
 ## Features
 - one html page for each individual in the gedcom file
-- a parental fan chart for each individual
+- ancenstor and descendant fan charts
+- a navigator chart (with d3 force simulation)
 ## Special Thanks
 - gedcom2html uses [gedcom.py](https://github.com/nickreynke/python-gedcom) by Nick Reynke to parse the gedcom file
 - [famousfamilytrees](http://famousfamilytrees.blogspot.com/?m=1) for the demo gedcom files
 ## To do
-- fix fan chart
-- fix jquery for parents
 - beautify CSS / colors
-- add full gedcom chart
-- add descendants chart
 - add title
 - home button
 - link to index.html with main person
@@ -32,7 +29,5 @@ python gedcom2html.py myfile.ged
    * -output-dir
    * -language
    * -set_main_person
-   * -statcounter
 - list of people in right column
-- parental tree with collapsable CSS boxes using jquery
 - improve age calculation

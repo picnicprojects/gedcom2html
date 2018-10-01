@@ -34,23 +34,16 @@ function drawChartNavigator(jsonNavigator){
    var div = d3.select("#chart_navigator");
 
    var svg = div.append("svg")
-      // .attr("viewBox", "0 0 1000 1000")
       .attr("id", "mysvg")
       .attr("width", width + padding * 2)
       .attr("height", height + padding * 2)
       .style("border", "0px")
       .append("g");
-      // .attr("transform", "translate("+width/2+","+height/2+")");
-      // .attr("transform", "scale(.1)")
 
     var simulation = d3.forceSimulation()
     .force("link", d3.forceLink().id(function(d) { return d.id; }))
     .force("charge", d3.forceManyBody())
     .force('collision', d3.forceCollide().radius(function(d) {return d.radius + 2}));
-    // .force('linkDistance', 50)
-    // .force("forceX", d3.forceX().strength(.1).x(width * .5))
-    // .force("forceY", d3.forceY().strength(.1).y(height * .5))
-    // .force("center", d3.forceCenter(width / 2, height / 2));
        
    var nodes = jsonNavigator.nodes;
    var links = jsonNavigator.links;
@@ -59,10 +52,6 @@ function drawChartNavigator(jsonNavigator){
    radius_large = 3 * radius_small;
    
    calcFixY();
-   
-   function linkDistance(d){
-      return 10;
-   }
    
    function calcFixY(){
       min = 100000;
@@ -83,31 +72,28 @@ function drawChartNavigator(jsonNavigator){
       });
       nodes.forEach(function(n) {
          if (n.birth_year.length > 0){
-            n.yFixed = height * (parseInt(n.birth_year) - min) / (max - min);
+            n.fy = height * (parseInt(n.birth_year) - min) / (max - min);
          }
          else{
             n.yFixed = null;
          }
-         n.children = [];
-         // console.log(n);
-         links.forEach(function(l) {
-            if (l.source == n.id)
-            {
-               n.children.push(l.target);
-            }            
-         });
+         // n.children = [];
+         // links.forEach(function(l) {
+            // if (l.source == n.id)
+            // {
+               // n.children.push(l.target);
+            // }            
+         // });
       });
    };
    
    var link = svg.append("g")
       .attr("class", "link")
-    .selectAll("line")
-    .data(links)
-    .enter().append("line")
-      .attr("stroke-width", 1);
+      .selectAll("line")
+      .data(links)
+      .enter().append("line")
+         .attr("stroke-width", 1);
 
-      
-      
    var node = svg.append("g")
       .attr("class", "nodes")
       .selectAll("circle")
@@ -138,6 +124,8 @@ function drawChartNavigator(jsonNavigator){
                   // nodes.forEach(function(p) {
                      // if (p.id == c)
                      // {
+// if (d.birth_year.length > 0){
+// min = Math.min(min, parseInt(d.birth_year));
                         // d.py = d.y = Math.max(d.y, p.y + ly);
                      // }
                   // });
@@ -155,7 +143,7 @@ function drawChartNavigator(jsonNavigator){
 
       // nodes.forEach(function(d) {
          // if (d.yFixed != null){
-            // d.y = d.py = d.yFixed;
+            // d.fy = d.yFixed;
          // }
       // });
       
@@ -204,7 +192,8 @@ function drawChartNavigator(jsonNavigator){
       node
          .attr("cx", function(d) { return d.x; })
          .attr("cy", function(d) { return d.y; });
-
+         // .attr("cx", function(d) {return (d.x = Math.max(radius, Math.min(width - radius, d.x)));})
+         // .attr("cy", function(d) {return (d.y = Math.max(radius, Math.min(height - radius, d.y)));})
       // rescale svg
       minx = miny = 100000;
       maxx = maxy = -100000;
