@@ -3,10 +3,6 @@
 ```
 python gedcom2html_test.py
 ```
-or
-```
-python gedcom2html.py myfile.ged
-```
 ## An example says it all. So have a look at:
 * [Dutch Royal Family](//picnicprojects.com/gedcom2html/dutchroyalfamily/)
 ## Features
@@ -18,9 +14,6 @@ python gedcom2html.py myfile.ged
 - [famousfamilytrees](http://famousfamilytrees.blogspot.com/?m=1) for the demo gedcom files
 ## To do
 - beautify CSS / colors
-- add title
-- home button
-- link to index.html with main person
 - command line options
    * -private
       * none
@@ -28,6 +21,5 @@ python gedcom2html.py myfile.ged
       * hide all people alive
    * -output-dir
    * -language
-   * -set_main_person
 - list of people in right column
 - improve age calculation

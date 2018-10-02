@@ -9,6 +9,10 @@ body {
    text-align:center;
 }
 
+.page-header a{
+   color:#bbb;
+}
+
 ul li{
    list-style-type: none;
 }

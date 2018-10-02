@@ -7,7 +7,7 @@ def calc_color(type, level = 0, gender = 'M'):
    level_max = 10.0;
    if type == 0: # not related
       c = '#aaa'
-   elif type == 1: # poi
+   elif type == 1: # home_person
       c = '#00f'
    elif type == 2: # parent
       x = 10 + 240 * (1 - (level / level_max))
@@ -67,7 +67,7 @@ class Html:
       self.__fid.write("<script type='text/javascript' src='js/gedcom2html.v4.js'></script>\n")
       self.__fid.write("</head>\n")
       self.__fid.write("<body>\n")
-      self.__fid.write("<div class='page-header'>%s</div>\n" % self.options.title)
+      self.__fid.write("<div class='page-header'><a href='index.html'><span class='fa fa-home'></span> %s</div></a>\n" % self.options.title)
       self.__fid.write("<div class='container'>\n")
       
    def __write_parents(self, id, level):
@@ -264,7 +264,6 @@ class Html:
       self.__fid.write("<div class='col-sm-6'>\n")
       path, fname = os.path.split(self.options.file_path)
       self.__fid.write("Gedcom file <a href='%s'>%s</a> contains %d persons<br>\n" % (fname, fname , len(self.all_persons)))
-      # self.__fid.write("Main person: <a href='%s'>%s</a>\n" % (self.all_persons[self.options.poi_id].link, self.all_persons[self.options.poi_id].short_name))
       if len(sources) > 0:
          self.__fid.write("<br><b>Sources:</b>\n")
          self.__fid.write("<ul>\n")
@@ -294,10 +293,10 @@ class Gedcom2html:
       def __init__(self):
          self.input_file = ""
          self.output_path = "generated"
-         self.sc_project = 0
-         self.sc_security = 0
+         self.sc_project = ""
+         self.sc_security = ""
          self.title = "gedcom2html by picnic projects"
-         self.poi = ""
+         self.home_person_id = ""
 
    def __init__(self):
       self.options = self.Options()
@@ -313,7 +312,6 @@ class Gedcom2html:
       shutil.copy2(gedcom_file, 'generated/'+fname)   
       shutil.copy2('gedcom2html.css','generated/css/')   
       shutil.copy2('gedcom2html.v4.js', 'generated/js/')
-      # shutil.copy2('fanchart.js', 'generated/js/')
       shutil.copy2('assets/css/font-awesome.min.css', 'generated/css/')
       shutil.copy2('assets/css/bootstrap.min.css', 'generated/css/')
       shutil.copy2('assets/js/d3.v4.min.js', 'generated/js/')
@@ -357,7 +355,6 @@ class Gedcom2html:
       p.string_dates = s
          
       #link
-      # s = "%s_%s_%s.html" % (p.id, p.first_name, p.surname) 
       s = "%s_%s.html" % (p.id, p.shortest_name) 
       s = s.replace(' ','_')
       valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
@@ -383,7 +380,10 @@ class Gedcom2html:
       id_list.sort()
       for id in id_list:
          self.__create_strings(all_persons[id])
-      self.__write_index_html(all_persons[id_list[0]].link)
+      if len(self.options.home_person_id) > 0:
+         self.__write_index_html(all_persons[self.options.home_person_id].link)
+      else:
+         self.__write_index_html(all_persons[id_list[0]].link)
       for id in id_list:
          p = all_persons[id]
          h = Html(p, all_persons, sources, self.options)
