@@ -3,8 +3,6 @@
 ```
 python gedcom2html_test.py
 ```
-## An example says it all. So have a look at:
-* [Dutch Royal Family](//picnicprojects.com/gedcom2html/dutchroyalfamily/)
 ## Features
 - one html page for each individual in the gedcom file
 - ancenstor and descendant fan charts
