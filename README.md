@@ -1,7 +1,7 @@
 # Convert gedcom to html with bootstrap, d3 and jquery using python
 ## Usage
 ```
-python gedcom2html_test.py
+python example.py
 ```
 ## Features
 - one html page for each individual in the gedcom file
