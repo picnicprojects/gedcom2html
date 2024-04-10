@@ -9,7 +9,8 @@ python example.py
 - a navigator chart (with d3 force simulation)
 <br>
 An example of the Dutch King:
-[![](img/dutchroyalfamily.jpg)](img/dutchroyalfamily.jpg) 
+
+![(https://raw.githubusercontent.com/picnicprojects/gedcom2html/master/img/dutchroyalfamily.jpg)](https://raw.githubusercontent.com/picnicprojects/gedcom2html/master/img/dutchroyalfamily.jpg) 
 
 ## Special Thanks
 - gedcom2html uses [gedcom.py](https://github.com/nickreynke/python-gedcom) by Nick Reynke to parse the gedcom file
