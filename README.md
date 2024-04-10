@@ -7,6 +7,8 @@ python example.py
 - one html page for each individual in the gedcom file
 - ancenstor and descendant fan charts
 - a navigator chart (with d3 force simulation)
+<br>
+An example of the Dutch King:<br><br>
 [![](img/dutchroyalfamily.jpg)](img/dutchroyalfamily.jpg) 
 
 ## Special Thanks
