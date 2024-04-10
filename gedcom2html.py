@@ -61,7 +61,7 @@ class Html:
       self.__fid.write("<link rel='stylesheet' type='text/css' href='css/bootstrap.min.css' />\n")
       self.__fid.write("<link rel='stylesheet' type='text/css' href='css/font-awesome.min.css' />\n")
       self.__fid.write("<link rel='stylesheet' type='text/css' href='css/gedcom2html.css' media='screen, projection, print' />\n")
-      self.__fid.write("<script type='text/javascript' src='js/jquery-3.1.1.min.js'></script>\n")
+      self.__fid.write("<script type='text/javascript' src='https://code.jquery.com/jquery-3.7.1.js'></script>\n")
       self.__fid.write("<script type='text/javascript' src='js/d3.v4.min.js'></script>\n")
       self.__fid.write("<script type='text/javascript' src='js/bootstrap.min.js'></script>\n")
       self.__fid.write("<script type='text/javascript' src='js/gedcom2html.v4.js'></script>\n")
