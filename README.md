@@ -3,6 +3,7 @@
 ```
 python example.py
 ```
+Open generated/index.html in a browser
 ## Features
 - one html page for each individual in the gedcom file
 - ancenstor and descendant fan charts
