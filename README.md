@@ -8,7 +8,7 @@ python example.py
 - ancenstor and descendant fan charts
 - a navigator chart (with d3 force simulation)
 <br>
-An example of the Dutch King:<br><br>
+An example of the Dutch King:
 [![](img/dutchroyalfamily.jpg)](img/dutchroyalfamily.jpg) 
 
 ## Special Thanks
