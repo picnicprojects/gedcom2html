@@ -230,8 +230,8 @@ class Gedcom:
             try:
                last_element = self.__parse_line(line_number, line.decode('utf-8'), last_element)
             except:
-               print line_number
-               print line
+               print(line_number)
+               print(line)
             line_number += 1
 
     @staticmethod
@@ -1241,7 +1241,7 @@ class GedcomParser:
                   p = self.__g.get_family_members(family_element, tag)
                   if len(p) > 0:
                      spouse_id = self.__element_get_id(p[0])
-                     if (person.id <> spouse_id):
+                     if (person.id != spouse_id):
                            family.spouse_id = spouse_id 
                pl = self.__g.get_family_members(family_element, 'CHIL')
                if len(pl) > 0:

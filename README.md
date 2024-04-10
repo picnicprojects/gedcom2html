@@ -7,6 +7,8 @@ python example.py
 - one html page for each individual in the gedcom file
 - ancenstor and descendant fan charts
 - a navigator chart (with d3 force simulation)
+[![](img/dutchroyalfamily.jpg)](img/dutchroyalfamily.jpg) 
+
 ## Special Thanks
 - gedcom2html uses [gedcom.py](https://github.com/nickreynke/python-gedcom) by Nick Reynke to parse the gedcom file
 - [famousfamilytrees](http://famousfamilytrees.blogspot.com/?m=1) for the demo gedcom files
