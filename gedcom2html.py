@@ -316,7 +316,6 @@ class Gedcom2html:
       shutil.copy2('assets/css/bootstrap.min.css', 'generated/css/')
       shutil.copy2('assets/js/d3.v4.min.js', 'generated/js/')
       shutil.copy2('assets/js/bootstrap.min.js', 'generated/js/')
-      shutil.copy2('assets/js/jquery-3.1.1.min.js', 'generated/js/')
       shutil.copytree('assets/font-awesome/fonts', 'generated/fonts/')
 
    def __create_strings(self, p):
